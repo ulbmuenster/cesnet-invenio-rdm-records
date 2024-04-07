@@ -19,7 +19,7 @@ from invenio_communities.config import COMMUNITIES_ROLES
 from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
 from invenio_communities.proxies import current_roles
 from invenio_records_permissions.generators import ConditionalGenerator, Generator
-from invenio_records_resources.services.files.transfer import TransferType
+from invenio_records_resources.services.files.generators import LocalFileGeneratorMixin
 from invenio_search.engine import dsl
 
 from ..records import RDMDraft
@@ -97,27 +97,12 @@ class IfDraft(ConditionalGenerator):
         return isinstance(record, RDMDraft)
 
 
-class IfFileIsLocal(ConditionalGenerator):
+class IfFileIsLocal(LocalFileGeneratorMixin, ConditionalGenerator):
     """Conditional generator for file storage class."""
 
     def _condition(self, record, file_key=None, **kwargs):
         """Check if the file is local."""
-        is_file_local = True
-        if file_key:
-            file_record = record.files.get(file_key)
-            # file_record __bool__ returns false for `if file_record`
-            file = file_record.file if file_record is not None else None
-            is_file_local = not file or file.storage_class == TransferType.LOCAL
-        else:
-            file_records = record.files.entries
-            for file_record in file_records:
-                file = file_record.file
-                if file and file.storage_class != TransferType.LOCAL:
-                    is_file_local = False
-                    break
-
-        return is_file_local
-
+        return self.is_file_local(record, file_key)
 
 class IfNewRecord(ConditionalGenerator):
     """Conditional generator for cases where we have a new record/draft."""
