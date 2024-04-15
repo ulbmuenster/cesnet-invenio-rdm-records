@@ -23,6 +23,8 @@ from invenio_requests.services.permissions import (
     PermissionPolicy as RequestPermissionPolicy,
 )
 from invenio_users_resources.services.permissions import UserManager
+from invenio_records_resources.services.files.generators import IfTransferType
+from invenio_records_resources.services.files.transfer import LOCAL_TRANSFER_TYPE
 
 from ..requests.access import GuestAccessRequest
 from .generators import (
@@ -32,7 +34,6 @@ from .generators import (
     IfCreate,
     IfDeleted,
     IfExternalDOIRecord,
-    IfFileIsLocal,
     IfNewRecord,
     IfRecordDeleted,
     IfRequestType,
@@ -124,7 +125,9 @@ class RDMRecordPermissionPolicy(RecordPermissionPolicy):
     can_get_content_files = [
         # note: even though this is closer to business logic than permissions,
         # it was simpler and less coupling to implement this as permission check
-        IfFileIsLocal(then_=can_read_files, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_read_files,
+        }, else_=SystemProcess())
     ]
     # Allow submitting new record
     can_create = can_authenticated
@@ -144,15 +147,21 @@ class RDMRecordPermissionPolicy(RecordPermissionPolicy):
     can_draft_create_files = can_review
     can_draft_set_content_files = [
         # review is the same as create_files
-        IfFileIsLocal(then_=can_review, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_review,
+        }, else_=SystemProcess())
     ]
     can_draft_get_content_files = [
         # preview is same as read_files
-        IfFileIsLocal(then_=can_draft_read_files, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_draft_read_files,
+        }, else_=SystemProcess())
     ]
     can_draft_commit_files = [
         # review is the same as create_files
-        IfFileIsLocal(then_=can_review, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_review,
+        }, else_=SystemProcess())
     ]
     can_draft_update_files = can_review
     can_draft_delete_files = can_review
@@ -224,15 +233,21 @@ class RDMRecordPermissionPolicy(RecordPermissionPolicy):
     can_draft_media_create_files = can_review
     can_draft_media_read_files = can_review
     can_draft_media_set_content_files = [
-        IfFileIsLocal(then_=can_review, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_review,
+        }, else_=SystemProcess())
     ]
     can_draft_media_get_content_files = [
         # preview is same as read_files
-        IfFileIsLocal(then_=can_preview, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_preview,
+        }, else_=SystemProcess())
     ]
     can_draft_media_commit_files = [
         # review is the same as create_files
-        IfFileIsLocal(then_=can_review, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_review,
+        }, else_=SystemProcess())
     ]
     can_draft_media_update_files = can_review
     can_draft_media_delete_files = can_review
@@ -247,7 +262,9 @@ class RDMRecordPermissionPolicy(RecordPermissionPolicy):
     can_media_get_content_files = [
         # note: even though this is closer to business logic than permissions,
         # it was simpler and less coupling to implement this as permission check
-        IfFileIsLocal(then_=can_read, else_=[SystemProcess()])
+        IfTransferType({
+            LOCAL_TRANSFER_TYPE: can_read,
+        }, else_=SystemProcess())
     ]
     can_media_create_files = [Disable()]
     can_media_set_content_files = [Disable()]
