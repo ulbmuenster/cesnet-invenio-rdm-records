@@ -24,7 +24,7 @@ from invenio_requests.services.permissions import (
 )
 from invenio_users_resources.services.permissions import UserManager
 from invenio_records_resources.services.files.generators import IfTransferType
-from invenio_records_resources.services.files.transfer import LOCAL_TRANSFER_TYPE
+from invenio_records_resources.services.files.transfer import LOCAL_TRANSFER_TYPE, MULTIPART_TRANSFER_TYPE
 
 from ..requests.access import GuestAccessRequest
 from .generators import (
@@ -161,6 +161,7 @@ class RDMRecordPermissionPolicy(RecordPermissionPolicy):
         # review is the same as create_files
         IfTransferType({
             LOCAL_TRANSFER_TYPE: can_review,
+            MULTIPART_TRANSFER_TYPE: can_review,
         }, else_=SystemProcess())
     ]
     can_draft_update_files = can_review
